@@ -1,3 +1,9 @@
+/*
+Thomas Weichhart
+29.07.2020
+Snake in C
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
