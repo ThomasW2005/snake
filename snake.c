@@ -3,6 +3,11 @@ Thomas Weichhart
 29.07.2020
 Snake in C
 */
+/*
+F5 // External console
+Tasks // 
+Edit Configurations // include
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
