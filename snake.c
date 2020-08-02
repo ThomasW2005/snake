@@ -26,7 +26,7 @@ void displayWin(int length, int olength, int milsec);
 int checkdead(int xpos[], int ypos[], int length);
 void setxy(int move, int x[], int y[]);
 void gameOver(int length, int olength, int milsec);
-void printsnake(int length, int xpos[], int ypos[]);
+void printsnake(int length, int xpos[], int ypos[], int move);
 void deletesnake(int length, int xpos[], int ypos[]);
 void genfood(int *randx, int *randy, int *length, int xpos[], int ypos[]);
 void initUI();
@@ -42,7 +42,7 @@ int main()
     clock_t start = clock(), diff;
     while (run == 1)
     {
-        printsnake(length, xpos, ypos);
+        printsnake(length, xpos, ypos, move);
         // gotoxy(xpos[0], ypos[0]);
         // printf("O");
         delay(100);
@@ -156,7 +156,7 @@ int getmove(int move, int *length)
     }
 }
 
-void printsnake(int length, int xpos[], int ypos[])
+void printsnake(int length, int xpos[], int ypos[], int move)
 {
     int steps, hue;
     hue = 10;
@@ -169,12 +169,25 @@ void printsnake(int length, int xpos[], int ypos[])
             hue = 15;
         textcolor(hue);
         gotoxy(xpos[i], ypos[i]);
-        printf("o");
+        printf("%c", 158);
     }
+    textcolor(2);
     gotoxy(xpos[0], ypos[0]);
-    textcolor(10);
-    printf("O");
-    textcolor(WHITE);
+    switch (move)
+    {
+    case 1:
+        printf("^");
+        break;
+    case 2:
+        printf("<");
+        break;
+    case 3:
+        printf("v");
+        break;
+    case 4:
+        printf(">");
+        break;
+    }
 }
 
 void deletesnake(int length, int xpos[], int ypos[])
