@@ -1,12 +1,7 @@
 /*
 Thomas Weichhart
-29.07.2020
+04.08.2020
 Snake in C
-*/
-/*
-F5 // External console
-Tasks // 
-Edit Configurations // include
 */
 
 #include <stdio.h>
@@ -25,10 +20,12 @@ void printLength(int length);
 void displayWin(int length, int olength, int milsec);
 int checkdead(int xpos[], int ypos[], int length);
 void setxy(int move, int x[], int y[]);
+void deathplay(int xpos[], int ypos[]);
 void gameOver(int length, int olength, int milsec);
 void printsnake(int length, int xpos[], int ypos[], int move);
 void deletesnake(int length, int xpos[], int ypos[]);
 void genfood(int *randx, int *randy, int *length, int xpos[], int ypos[]);
+void fprintsnake(int length, int xpos[], int ypos[], int move, int oldmove);
 void initUI();
 
 int main()
@@ -36,26 +33,22 @@ int main()
     setCursorType(0);
     initConsole();
     srand(time(0));
-    int move = 4, length = 3, olength = length, xpos[YSIZE * XSIZE] = {}, ypos[YSIZE * XSIZE] = {}, run = 1, ax, ay;
+    int move = 4, oldmove = move, length = 8, olength = length, xpos[YSIZE * XSIZE] = {}, ypos[YSIZE * XSIZE] = {}, run = 1, ax, ay; //length = length-2
     initUI();
     genfood(&ax, &ay, &length, xpos, ypos);
     clock_t start = clock(), diff;
     while (run == 1)
     {
-        printsnake(length, xpos, ypos, move);
-        // gotoxy(xpos[0], ypos[0]);
-        // printf("O");
-        delay(100);
-        deletesnake(length, xpos, ypos);
-        // gotoxy(xpos[length - 1], ypos[length - 1]);
-        // printf(" ");
-        printLength(length);
         shift(xpos);
         shift(ypos);
         setxy(move, xpos, ypos);
+        fprintsnake(length, xpos, ypos, move, oldmove);
+        delay(100);
+        deletesnake(length, xpos, ypos);
+        printLength(length);
         run = checkdead(xpos, ypos, length);
-        if (xpos[0] == ax && ypos[0] == ay)
-            genfood(&ax, &ay, &length, xpos, ypos);
+        genfood(&ax, &ay, &length, xpos, ypos);
+        oldmove = move;
         if (kbhit())
             move = getmove(move, &length);
     }
@@ -64,7 +57,10 @@ int main()
     if (run == 2)
         displayWin(length, olength, milsec);
     else
+    {
+        deathplay(xpos, ypos);
         gameOver(length, olength, milsec);
+    }
     return 0;
 }
 void setxy(int move, int x[], int y[])
@@ -156,20 +152,81 @@ int getmove(int move, int *length)
     }
 }
 
-void printsnake(int length, int xpos[], int ypos[], int move)
+void fprintsnake(int length, int xpos[], int ypos[], int move, int oldmove)
 {
-    int steps, hue;
-    hue = 10;
-    steps = length / 3;
-    for (int i = 0; i < length; i++)
+    /*
+    old = 1 & new = 2 == 187
+    old = 1 & new = 4 == 201
+
+    old = 2 & new = 1 == 200
+    old = 2 & new = 3 == 201
+
+    old = 3 & new = 2 == 188
+    old = 3 & new = 4 == 200
+
+    old = 4 & new = 1 == 188
+    old = 4 & new = 3 == 187
+    */
+    gotoxy(xpos[1], ypos[1]);
+    switch (oldmove)
     {
-        if (i == steps)
-            hue = 2;
-        if (i == 2 * steps)
-            hue = 15;
-        textcolor(hue);
-        gotoxy(xpos[i], ypos[i]);
-        printf("%c", 158);
+    case 1:
+        switch (move)
+        {
+        case 1:
+            printf("%c", 186);
+            break;
+        case 2:
+            printf("%c", 187);
+            break;
+        case 4:
+            printf("%c", 201);
+            break;
+        }
+        break;
+
+    case 2:
+        switch (move)
+        {
+        case 2:
+            printf("%c", 205);
+            break;
+        case 1:
+            printf("%c", 200);
+            break;
+        case 3:
+            printf("%c", 201);
+            break;
+        }
+        break;
+    case 3:
+        switch (move)
+        {
+        case 3:
+            printf("%c", 186);
+            break;
+        case 2:
+            printf("%c", 188);
+            break;
+        case 4:
+            printf("%c", 200);
+            break;
+        }
+        break;
+    case 4:
+        switch (move)
+        {
+        case 4:
+            printf("%c", 205);
+            break;
+        case 1:
+            printf("%c", 188);
+            break;
+        case 3:
+            printf("%c", 187);
+            break;
+        }
+        break;
     }
     textcolor(2);
     gotoxy(xpos[0], ypos[0]);
@@ -188,15 +245,13 @@ void printsnake(int length, int xpos[], int ypos[], int move)
         printf(">");
         break;
     }
+    textcolor(WHITE);
 }
 
 void deletesnake(int length, int xpos[], int ypos[])
 {
-    for (int i = 0; i < length; i++) //delete snake
-    {
-        gotoxy(xpos[i], ypos[i]);
-        printf(" ");
-    }
+    gotoxy(xpos[length], ypos[length]);
+    printf(" ");
 }
 
 void shift(int array[])
@@ -209,8 +264,26 @@ int checkdead(int xpos[], int ypos[], int length)
 {
     if (length == XSIZE * YSIZE)
         return 2;
-    if (xpos[0] == XSIZE || xpos[0] == -1 || ypos[0] == YSIZE || ypos[0] == -1)
+    if (xpos[0] == XSIZE)
+    {
+        xpos[0] = XSIZE - 1;
         return 0;
+    }
+    if (xpos[0] == -1)
+    {
+        xpos[0] = 0;
+        return 0;
+    }
+    if (ypos[0] == YSIZE)
+    {
+        ypos[0] == YSIZE - 1;
+        return 0;
+    }
+    if (ypos[0] == -1)
+    {
+        ypos[0] = 0;
+        return 0;
+    }
     for (int i = 0; i < length - 1; i++)
     {
         if (xpos[0] == xpos[i + 1] && ypos[0] == ypos[i + 1])
@@ -219,30 +292,57 @@ int checkdead(int xpos[], int ypos[], int length)
     return 1;
 }
 
+void deathplay(int xpos[], int ypos[])
+{
+    int x = xpos[0];
+    int y = ypos[0];
+    for (int i = 0; i < 4; i++)
+    {
+        gotoxy(x, y);
+        printf("-");
+        delay(50);
+        gotoxy(x, y);
+        printf("%c", 92);
+        delay(50);
+        gotoxy(x, y);
+        printf("|");
+        delay(50);
+        gotoxy(x, y);
+        printf("/");
+        delay(50);
+    }
+    gotoxy(x, y);
+    printf("X");
+    delay(900);
+}
+
 void genfood(int *randx, int *randy, int *length, int xpos[], int ypos[])
 {
     int i, run;
-    if (*length != XSIZE * YSIZE)
+    if (xpos[0] == *randx && ypos[0] == *randy)
     {
-        do
+        if (*length != XSIZE * YSIZE)
         {
-            *randx = rand() % XSIZE;
-            (*randy) = rand() % YSIZE;
-            for (i = 0; i < (*length); i++)
+            do
             {
-                if ((*randx) == xpos[i] && (*randy) == ypos[i])
+                *randx = rand() % XSIZE;
+                (*randy) = rand() % YSIZE;
+                for (i = 0; i < (*length); i++)
                 {
-                    run = 1;
-                    break;
+                    if ((*randx) == xpos[i] && (*randy) == ypos[i])
+                    {
+                        run = 1;
+                        break;
+                    }
+                    run = 0;
                 }
-                run = 0;
-            }
-        } while (run == 1);
-        gotoxy(*randx, *randy);
-        textcolor(H_RED);
-        printf("@");
-        textcolor(WHITE);
-        (*length)++;
+            } while (run == 1);
+            gotoxy(*randx, *randy);
+            textcolor(H_RED);
+            printf("@");
+            textcolor(WHITE);
+            (*length)++;
+        }
     }
 }
 
@@ -265,7 +365,7 @@ void gameOver(int length, int olength, int milsec)
 {
     clrscr();
     gotoxy(35, 15);
-    printf("score: %d", length - olength);
+    printf("score: %d", length - olength - 1);
     gotoxy(27, 16);
     printf("Gametime: %d s, %d ms", milsec / 1000, milsec % 1000);
     gotoxy(0, 8);
@@ -277,13 +377,14 @@ void gameOver(int length, int olength, int milsec)
         "             | | |_ |/ _` | '_ ` _ \\ / _ \\ | |  | \\ \\ / / _ \\ '__|\n"
         "             | |__| | (_| | | | | | |  __/ | |__| |\\ V /  __/ |   \n"
         "              \\_____|\\__,_|_| |_| |_|\\___|  \\____/  \\_/ \\___|_|   ");
+    delay(800);
     getch();
 }
 
 void printLength(int length)
 {
     gotoxy(8, YSIZE + 1);
-    printf("%d ", length);
+    printf("%d ", length + 1);
 }
 
 void displayWin(int length, int olength, int milsec)
