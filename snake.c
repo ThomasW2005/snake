@@ -11,7 +11,7 @@ Snake in C
 #include <time.h>
 #include "console.c"
 
-#define XSIZE 79
+#define XSIZE 80
 #define YSIZE 23
 
 int getmove(int move, int *length);
@@ -33,7 +33,7 @@ int main()
     setCursorType(0);
     initConsole();
     srand(time(0));
-    int move = 4, oldmove = move, length = 8, olength = length, xpos[YSIZE * XSIZE] = {}, ypos[YSIZE * XSIZE] = {}, run = 1, ax, ay; //length = length-2
+    int move = 4, oldmove = move, length = 2, olength = length, xpos[YSIZE * XSIZE] = {}, ypos[YSIZE * XSIZE] = {}, run = 1, ax, ay; //length = length-2
     initUI();
     genfood(&ax, &ay, &length, xpos, ypos);
     clock_t start = clock(), diff;
@@ -352,11 +352,11 @@ void initUI()
     gotoxy(0, YSIZE);
     for (i = 0; i < XSIZE; i++)
         printf("-");
-    for (i = 0; i < YSIZE; i++)
-    {
-        gotoxy(XSIZE, i);
-        printf("|");
-    }
+    // for (i = 0; i < YSIZE; i++)
+    // {
+    //     gotoxy(XSIZE, i);
+    //     printf("|");
+    // }
     gotoxy(0, YSIZE + 1);
     printf("L%cnge: ", 132);
 }
